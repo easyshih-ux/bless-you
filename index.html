@@ -204,47 +204,6 @@
       z-index: 1;
     }
 
-    .shuffle-icon {
-      width: 92px;
-      height: 58px;
-      display: none;
-      position: relative;
-      margin: 0 auto 18px;
-    }
-
-    .shuffle-icon span {
-      width: 38px;
-      height: 52px;
-      position: absolute;
-      top: 3px;
-      left: 27px;
-      border: 2px solid rgba(216, 70, 95, 0.55);
-      border-radius: 6px;
-      background: linear-gradient(135deg, #fffdf8, #ffe7db);
-      box-shadow: 0 8px 18px rgba(34, 48, 47, 0.12);
-      transform-origin: center bottom;
-    }
-
-    .shuffle-icon span:nth-child(1) {
-      animation: shuffle-left 900ms ease-in-out infinite;
-    }
-
-    .shuffle-icon span:nth-child(2) {
-      border-color: rgba(47, 143, 130, 0.55);
-      background: linear-gradient(135deg, #ffffff, #def7ef);
-      animation: shuffle-center 900ms ease-in-out infinite;
-    }
-
-    .shuffle-icon span:nth-child(3) {
-      border-color: rgba(215, 154, 52, 0.65);
-      background: linear-gradient(135deg, #ffffff, #fff1cb);
-      animation: shuffle-right 900ms ease-in-out infinite;
-    }
-
-    .card-shell.is-drawing .shuffle-icon {
-      display: block;
-    }
-
     .placeholder strong {
       display: block;
       margin-bottom: 10px;
@@ -278,33 +237,6 @@
       }
       100% {
         transform: scale(1) rotate(0deg);
-      }
-    }
-
-    @keyframes shuffle-left {
-      0%, 100% {
-        transform: translateX(-22px) rotate(-10deg);
-      }
-      50% {
-        transform: translateX(8px) rotate(6deg);
-      }
-    }
-
-    @keyframes shuffle-center {
-      0%, 100% {
-        transform: translateY(0) rotate(0deg);
-      }
-      50% {
-        transform: translateY(-8px) rotate(-3deg);
-      }
-    }
-
-    @keyframes shuffle-right {
-      0%, 100% {
-        transform: translateX(22px) rotate(10deg);
-      }
-      50% {
-        transform: translateX(-8px) rotate(-6deg);
       }
     }
 
@@ -369,11 +301,6 @@
       <div class="card-shell" id="cardShell">
         <div class="placeholder" id="placeholder">
           <div>
-            <div class="shuffle-icon" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
             <strong>祝福待抽</strong>
             <span>點擊左側按鈕開始</span>
           </div>
