@@ -354,9 +354,18 @@
     const drawnCount = document.querySelector("#drawnCount");
     const resultText = document.querySelector("#resultText");
 
-    let remaining = [...cards];
+    let remaining = shuffle([...cards]);
     let drawn = [];
     let isDrawing = false;
+
+    function shuffle(deck) {
+      for (let index = deck.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [deck[index], deck[randomIndex]] = [deck[randomIndex], deck[index]];
+      }
+
+      return deck;
+    }
 
     function updateStats() {
       remainingCount.textContent = remaining.length;
@@ -364,20 +373,33 @@
       drawButton.disabled = remaining.length === 0 || isDrawing;
     }
 
-    function pickRandomCard() {
-      const index = Math.floor(Math.random() * remaining.length);
-      const [card] = remaining.splice(index, 1);
+    function drawFromDeck() {
+      const card = remaining.shift();
       drawn.push(card);
       return card;
     }
 
+    function getCardNumber(card) {
+      const match = card.match(/\d{2}/);
+      return match ? match[0] : card;
+    }
+
     function showCard(card) {
-      placeholder.hidden = true;
-      cardImage.hidden = false;
+      cardImage.hidden = true;
+      cardImage.onload = () => {
+        placeholder.hidden = true;
+        cardImage.hidden = false;
+        cardImage.alt = `抽出的祝福卡 ${getCardNumber(card)}`;
+        cardImage.classList.remove("pop");
+        void cardImage.offsetWidth;
+        cardImage.classList.add("pop");
+      };
+      cardImage.onerror = () => {
+        cardImage.hidden = true;
+        placeholder.hidden = false;
+        resultText.textContent = `找不到圖片：${card}`;
+      };
       cardImage.src = encodeURI(card);
-      cardImage.classList.remove("pop");
-      void cardImage.offsetWidth;
-      cardImage.classList.add("pop");
     }
 
     function drawCard() {
@@ -391,18 +413,16 @@
       cardShell.classList.add("is-drawing");
 
       let ticks = 0;
-      const preview = window.setInterval(() => {
-        const randomPreview = cards[Math.floor(Math.random() * cards.length)];
+      const shuffleMotion = window.setInterval(() => {
         cardShell.style.setProperty("--tilt", `${Math.random() * 6 - 3}deg`);
-        showCard(randomPreview);
         ticks += 1;
 
-        if (ticks >= 14) {
-          window.clearInterval(preview);
-          const card = pickRandomCard();
+        if (ticks >= 8) {
+          window.clearInterval(shuffleMotion);
+          const card = drawFromDeck();
           showCard(card);
           cardShell.classList.remove("is-drawing");
-          resultText.textContent = `抽到第 ${drawn.length} 張祝福。`;
+          resultText.textContent = `抽到第 ${getCardNumber(card)} 號祝福卡，這是第 ${drawn.length} 張。`;
           isDrawing = false;
           updateStats();
 
@@ -414,7 +434,7 @@
     }
 
     function resetLottery() {
-      remaining = [...cards];
+      remaining = shuffle([...cards]);
       drawn = [];
       isDrawing = false;
       cardImage.hidden = true;
@@ -435,6 +455,10 @@
     });
 
     updateStats();
+    cards.forEach((card) => {
+      const image = new Image();
+      image.src = encodeURI(card);
+    });
   </script>
 </body>
 </html>
