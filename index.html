@@ -350,12 +350,16 @@
     const cardShell = document.querySelector("#cardShell");
     const cardImage = document.querySelector("#cardImage");
     const placeholder = document.querySelector("#placeholder");
+    const placeholderTitle = placeholder.querySelector("strong");
+    const placeholderHint = placeholder.querySelector("span");
     const remainingCount = document.querySelector("#remainingCount");
     const drawnCount = document.querySelector("#drawnCount");
     const resultText = document.querySelector("#resultText");
+    const assetVersion = "20260611-3";
 
     let remaining = shuffle([...cards]);
     let drawn = [];
+    let drawnSet = new Set();
     let isDrawing = false;
     let drawToken = 0;
 
@@ -375,8 +379,18 @@
     }
 
     function drawFromDeck() {
-      const card = remaining.shift();
+      let card = remaining.shift();
+
+      while (card && drawnSet.has(card)) {
+        card = remaining.shift();
+      }
+
+      if (!card) {
+        return null;
+      }
+
       drawn.push(card);
+      drawnSet.add(card);
       return card;
     }
 
@@ -385,8 +399,23 @@
       return match ? match[0] : card;
     }
 
+    function setPlaceholder(title, hint) {
+      placeholderTitle.textContent = title;
+      placeholderHint.textContent = hint;
+      placeholder.hidden = false;
+    }
+
+    function getImageUrl(card) {
+      return `${encodeURI(card)}?v=${assetVersion}`;
+    }
+
     function showCard(card, token) {
       const image = new Image();
+      const imageUrl = getImageUrl(card);
+
+      cardImage.hidden = true;
+      cardImage.removeAttribute("src");
+      setPlaceholder("祝福打開中", `第 ${getCardNumber(card)} 號祝福卡`);
 
       image.onload = () => {
         if (token !== drawToken) {
@@ -395,7 +424,7 @@
 
         placeholder.hidden = true;
         cardImage.hidden = false;
-        cardImage.src = image.src;
+        cardImage.src = imageUrl;
         cardImage.alt = `抽出的祝福卡 ${getCardNumber(card)}`;
         cardImage.classList.remove("pop");
         void cardImage.offsetWidth;
@@ -415,15 +444,15 @@
           return;
         }
 
-        placeholder.hidden = false;
         cardImage.hidden = true;
         cardShell.classList.remove("is-drawing");
+        setPlaceholder("圖片打不開", card);
         resultText.textContent = `找不到圖片：${card}`;
         isDrawing = false;
         updateStats();
       };
 
-      image.src = encodeURI(card);
+      image.src = imageUrl;
     }
 
     function drawCard() {
@@ -436,6 +465,8 @@
       updateStats();
       resultText.textContent = "抽籤中...";
       cardShell.classList.add("is-drawing");
+      cardImage.hidden = true;
+      setPlaceholder("洗牌中", "請等一下，祝福正在靠近。");
 
       let ticks = 0;
       const shuffleMotion = window.setInterval(() => {
@@ -445,6 +476,14 @@
         if (ticks >= 8) {
           window.clearInterval(shuffleMotion);
           const card = drawFromDeck();
+          if (!card) {
+            cardShell.classList.remove("is-drawing");
+            resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
+            isDrawing = false;
+            updateStats();
+            return;
+          }
+
           resultText.textContent = `正在打開第 ${getCardNumber(card)} 號祝福卡...`;
           showCard(card, drawToken);
         }
@@ -454,11 +493,12 @@
     function resetLottery() {
       remaining = shuffle([...cards]);
       drawn = [];
+      drawnSet = new Set();
       isDrawing = false;
       drawToken += 1;
       cardImage.hidden = true;
       cardImage.removeAttribute("src");
-      placeholder.hidden = false;
+      setPlaceholder("祝福待抽", "點擊左側按鈕開始");
       cardShell.classList.remove("is-drawing");
       resultText.textContent = "已重新開始，祝福再次洗牌。";
       updateStats();
