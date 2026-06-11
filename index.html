@@ -312,37 +312,37 @@
 
   <script>
     const cards = [
-      "card01.png",
-      "card02.png",
-      "card 03.png",
-      "card04.png",
-      "card 05.png",
-      "card06.png",
-      "card07.png",
-      "card08.png",
-      "card09.png",
-      "card 10.png",
-      "card11.png",
-      "card 12.png",
-      "card 13.png",
-      "card14.png",
-      "card15.png",
-      "card16.png",
-      "card 17.png",
-      "card 18.png",
-      "card19.png",
-      "card 20.png",
-      "card21.png",
-      "card22.png",
-      "card23.png",
-      "card 24.png",
-      "card 25.png",
-      "card26.png",
-      "card27.png",
-      "card28.png",
-      "card 29.png",
-      "card30.png",
-      "card31.png"
+      "optimized/card01.jpg",
+      "optimized/card02.jpg",
+      "optimized/card03.jpg",
+      "optimized/card04.jpg",
+      "optimized/card05.jpg",
+      "optimized/card06.jpg",
+      "optimized/card07.jpg",
+      "optimized/card08.jpg",
+      "optimized/card09.jpg",
+      "optimized/card10.jpg",
+      "optimized/card11.jpg",
+      "optimized/card12.jpg",
+      "optimized/card13.jpg",
+      "optimized/card14.jpg",
+      "optimized/card15.jpg",
+      "optimized/card16.jpg",
+      "optimized/card17.jpg",
+      "optimized/card18.jpg",
+      "optimized/card19.jpg",
+      "optimized/card20.jpg",
+      "optimized/card21.jpg",
+      "optimized/card22.jpg",
+      "optimized/card23.jpg",
+      "optimized/card24.jpg",
+      "optimized/card25.jpg",
+      "optimized/card26.jpg",
+      "optimized/card27.jpg",
+      "optimized/card28.jpg",
+      "optimized/card29.jpg",
+      "optimized/card30.jpg",
+      "optimized/card31.jpg"
     ];
 
     const drawButton = document.querySelector("#drawButton");
@@ -355,7 +355,8 @@
     const remainingCount = document.querySelector("#remainingCount");
     const drawnCount = document.querySelector("#drawnCount");
     const resultText = document.querySelector("#resultText");
-    const assetVersion = "20260611-3";
+    const assetVersion = "20260611-4";
+    const imageCache = new Map();
 
     let remaining = shuffle([...cards]);
     let drawn = [];
@@ -376,6 +377,18 @@
       remainingCount.textContent = remaining.length;
       drawnCount.textContent = drawn.length;
       drawButton.disabled = remaining.length === 0 || isDrawing;
+    }
+
+    function preloadUpcomingCards(count = 4) {
+      remaining.slice(0, count).forEach((card) => {
+        if (imageCache.has(card)) {
+          return;
+        }
+
+        const image = new Image();
+        image.src = getImageUrl(card);
+        imageCache.set(card, image);
+      });
     }
 
     function drawFromDeck() {
@@ -433,6 +446,7 @@
         resultText.textContent = `抽到第 ${getCardNumber(card)} 號祝福卡，這是第 ${drawn.length} 張。`;
         isDrawing = false;
         updateStats();
+        preloadUpcomingCards();
 
         if (remaining.length === 0) {
           resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
@@ -453,6 +467,7 @@
       };
 
       image.src = imageUrl;
+      imageCache.set(card, image);
     }
 
     function drawCard() {
@@ -494,6 +509,7 @@
       remaining = shuffle([...cards]);
       drawn = [];
       drawnSet = new Set();
+      imageCache.clear();
       isDrawing = false;
       drawToken += 1;
       cardImage.hidden = true;
@@ -502,6 +518,7 @@
       cardShell.classList.remove("is-drawing");
       resultText.textContent = "已重新開始，祝福再次洗牌。";
       updateStats();
+      preloadUpcomingCards();
     }
 
     drawButton.addEventListener("click", drawCard);
@@ -514,6 +531,7 @@
     });
 
     updateStats();
+    preloadUpcomingCards();
   </script>
 </body>
 </html>
