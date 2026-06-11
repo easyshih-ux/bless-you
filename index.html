@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>期末祝福抽籤</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #22302f;
+      --muted: #667674;
+      --paper: #fffdf8;
+      --line: rgba(34, 48, 47, 0.16);
+      --accent: #d8465f;
+      --accent-dark: #a42f45;
+      --gold: #d79a34;
+      --mint: #2f8f82;
+      --shadow: 0 24px 70px rgba(33, 42, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(216, 70, 95, 0.16), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(47, 143, 130, 0.14), transparent 28%),
+        linear-gradient(135deg, #fff7ee 0%, #f4fbf8 48%, #fff9f1 100%);
+      overflow-x: hidden;
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 410px) minmax(320px, 1fr);
+      gap: 32px;
+      align-items: center;
+      padding: 40px clamp(20px, 5vw, 72px);
+    }
+
+    .panel {
+      display: grid;
+      gap: 22px;
+      align-content: center;
+    }
+
+    .kicker {
+      margin: 0;
+      color: var(--mint);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .intro {
+      margin: 0;
+      max-width: 32rem;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .stat {
+      min-width: 118px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 248, 0.7);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    button {
+      min-height: 48px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 22px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .draw-button {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      box-shadow: 0 14px 28px rgba(216, 70, 95, 0.28);
+    }
+
+    .draw-button:hover {
+      box-shadow: 0 18px 34px rgba(216, 70, 95, 0.34);
+      transform: translateY(-1px);
+    }
+
+    .reset-button {
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+    }
+
+    .stage {
+      min-height: min(84vh, 760px);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .card-shell {
+      width: min(100%, 560px);
+      aspect-ratio: 3 / 4.15;
+      display: grid;
+      place-items: center;
+      position: relative;
+      padding: clamp(10px, 2vw, 18px);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(255, 253, 248, 0.58)),
+        repeating-linear-gradient(45deg, rgba(215, 154, 52, 0.08) 0 8px, transparent 8px 16px);
+      box-shadow: var(--shadow);
+    }
+
+    .card-shell::before,
+    .card-shell::after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(215, 154, 52, 0.35);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .card-shell::after {
+      inset: 20px;
+      border-color: rgba(47, 143, 130, 0.18);
+    }
+
+    .blessing-card {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 6px;
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+      transition: opacity 220ms ease, transform 260ms ease;
+      z-index: 1;
+    }
+
+    .placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      border: 2px dashed rgba(34, 48, 47, 0.18);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.45);
+      z-index: 1;
+    }
+
+    .placeholder strong {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--ink);
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.2;
+    }
+
+    .result-text {
+      min-height: 30px;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .is-drawing .blessing-card {
+      opacity: 0.5;
+      transform: rotate(var(--tilt, 2deg)) scale(0.985);
+    }
+
+    .pop {
+      animation: pop 420ms cubic-bezier(.18, .89, .32, 1.28);
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.92) rotate(-2deg);
+      }
+      70% {
+        transform: scale(1.03) rotate(1deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @media (max-width: 860px) {
+      main {
+        grid-template-columns: 1fr;
+        gap: 22px;
+        align-items: start;
+        padding: 26px 16px 36px;
+      }
+
+      .panel {
+        gap: 16px;
+      }
+
+      .intro {
+        font-size: 16px;
+      }
+
+      .stage {
+        min-height: auto;
+      }
+
+      .card-shell {
+        width: min(100%, 440px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel" aria-label="抽籤控制">
+      <p class="kicker">Final Blessing Lottery</p>
+      <h1>期末學生祝福抽籤</h1>
+      <p class="intro">按下抽籤，從 31 張祝福卡中抽出一張送給學生。每張卡在重置前只會出現一次。</p>
+
+      <div class="stats" aria-live="polite">
+        <div class="stat">
+          <strong id="remainingCount">31</strong>
+          <span>尚未抽出</span>
+        </div>
+        <div class="stat">
+          <strong id="drawnCount">0</strong>
+          <span>已抽出</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="draw-button" id="drawButton" type="button">抽一張祝福</button>
+        <button class="reset-button" id="resetButton" type="button">重新開始</button>
+      </div>
+
+      <div class="result-text" id="resultText" aria-live="polite">準備好了，讓祝福登場。</div>
+    </section>
+
+    <section class="stage" aria-label="祝福卡">
+      <div class="card-shell" id="cardShell">
+        <div class="placeholder" id="placeholder">
+          <div>
+            <strong>祝福待抽</strong>
+            <span>點擊左側按鈕開始</span>
+          </div>
+        </div>
+        <img class="blessing-card" id="cardImage" alt="抽出的祝福卡" hidden>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const cards = [
+      "card01.png",
+      "card02.png",
+      "card 03.png",
+      "card04.png",
+      "card 05.png",
+      "card06.png",
+      "card07.png",
+      "card08.png",
+      "card09.png",
+      "card 10.png",
+      "card11.png",
+      "card 12.png",
+      "card 13.png",
+      "card14.png",
+      "card15.png",
+      "card16.png",
+      "card 17.png",
+      "card 18.png",
+      "card19.png",
+      "card 20.png",
+      "card21.png",
+      "card22.png",
+      "card23.png",
+      "card 24.png",
+      "card 25.png",
+      "card26.png",
+      "card27.png",
+      "card28.png",
+      "card 29.png",
+      "card30.png",
+      "card31.png"
+    ];
+
+    const drawButton = document.querySelector("#drawButton");
+    const resetButton = document.querySelector("#resetButton");
+    const cardShell = document.querySelector("#cardShell");
+    const cardImage = document.querySelector("#cardImage");
+    const placeholder = document.querySelector("#placeholder");
+    const remainingCount = document.querySelector("#remainingCount");
+    const drawnCount = document.querySelector("#drawnCount");
+    const resultText = document.querySelector("#resultText");
+
+    let remaining = [...cards];
+    let drawn = [];
+    let isDrawing = false;
+
+    function updateStats() {
+      remainingCount.textContent = remaining.length;
+      drawnCount.textContent = drawn.length;
+      drawButton.disabled = remaining.length === 0 || isDrawing;
+    }
+
+    function pickRandomCard() {
+      const index = Math.floor(Math.random() * remaining.length);
+      const [card] = remaining.splice(index, 1);
+      drawn.push(card);
+      return card;
+    }
+
+    function showCard(card) {
+      placeholder.hidden = true;
+      cardImage.hidden = false;
+      cardImage.src = encodeURI(card);
+      cardImage.classList.remove("pop");
+      void cardImage.offsetWidth;
+      cardImage.classList.add("pop");
+    }
+
+    function drawCard() {
+      if (isDrawing || remaining.length === 0) {
+        return;
+      }
+
+      isDrawing = true;
+      updateStats();
+      resultText.textContent = "抽籤中...";
+      cardShell.classList.add("is-drawing");
+
+      let ticks = 0;
+      const preview = window.setInterval(() => {
+        const randomPreview = cards[Math.floor(Math.random() * cards.length)];
+        cardShell.style.setProperty("--tilt", `${Math.random() * 6 - 3}deg`);
+        showCard(randomPreview);
+        ticks += 1;
+
+        if (ticks >= 14) {
+          window.clearInterval(preview);
+          const card = pickRandomCard();
+          showCard(card);
+          cardShell.classList.remove("is-drawing");
+          resultText.textContent = `抽到第 ${drawn.length} 張祝福。`;
+          isDrawing = false;
+          updateStats();
+
+          if (remaining.length === 0) {
+            resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
+          }
+        }
+      }, 80);
+    }
+
+    function resetLottery() {
+      remaining = [...cards];
+      drawn = [];
+      isDrawing = false;
+      cardImage.hidden = true;
+      cardImage.removeAttribute("src");
+      placeholder.hidden = false;
+      cardShell.classList.remove("is-drawing");
+      resultText.textContent = "已重新開始，祝福再次洗牌。";
+      updateStats();
+    }
+
+    drawButton.addEventListener("click", drawCard);
+    resetButton.addEventListener("click", resetLottery);
+    window.addEventListener("keydown", (event) => {
+      if (event.code === "Space" || event.code === "Enter") {
+        event.preventDefault();
+        drawCard();
+      }
+    });
+
+    updateStats();
+  </script>
+</body>
+</html>
