@@ -357,6 +357,7 @@
     let remaining = shuffle([...cards]);
     let drawn = [];
     let isDrawing = false;
+    let drawToken = 0;
 
     function shuffle(deck) {
       for (let index = deck.length - 1; index > 0; index -= 1) {
@@ -384,22 +385,45 @@
       return match ? match[0] : card;
     }
 
-    function showCard(card) {
-      cardImage.hidden = true;
-      cardImage.onload = () => {
+    function showCard(card, token) {
+      const image = new Image();
+
+      image.onload = () => {
+        if (token !== drawToken) {
+          return;
+        }
+
         placeholder.hidden = true;
         cardImage.hidden = false;
+        cardImage.src = image.src;
         cardImage.alt = `抽出的祝福卡 ${getCardNumber(card)}`;
         cardImage.classList.remove("pop");
         void cardImage.offsetWidth;
         cardImage.classList.add("pop");
+        cardShell.classList.remove("is-drawing");
+        resultText.textContent = `抽到第 ${getCardNumber(card)} 號祝福卡，這是第 ${drawn.length} 張。`;
+        isDrawing = false;
+        updateStats();
+
+        if (remaining.length === 0) {
+          resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
+        }
       };
-      cardImage.onerror = () => {
-        cardImage.hidden = true;
+
+      image.onerror = () => {
+        if (token !== drawToken) {
+          return;
+        }
+
         placeholder.hidden = false;
+        cardImage.hidden = true;
+        cardShell.classList.remove("is-drawing");
         resultText.textContent = `找不到圖片：${card}`;
+        isDrawing = false;
+        updateStats();
       };
-      cardImage.src = encodeURI(card);
+
+      image.src = encodeURI(card);
     }
 
     function drawCard() {
@@ -408,6 +432,7 @@
       }
 
       isDrawing = true;
+      drawToken += 1;
       updateStats();
       resultText.textContent = "抽籤中...";
       cardShell.classList.add("is-drawing");
@@ -420,15 +445,8 @@
         if (ticks >= 8) {
           window.clearInterval(shuffleMotion);
           const card = drawFromDeck();
-          showCard(card);
-          cardShell.classList.remove("is-drawing");
-          resultText.textContent = `抽到第 ${getCardNumber(card)} 號祝福卡，這是第 ${drawn.length} 張。`;
-          isDrawing = false;
-          updateStats();
-
-          if (remaining.length === 0) {
-            resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
-          }
+          resultText.textContent = `正在打開第 ${getCardNumber(card)} 號祝福卡...`;
+          showCard(card, drawToken);
         }
       }, 80);
     }
@@ -437,6 +455,7 @@
       remaining = shuffle([...cards]);
       drawn = [];
       isDrawing = false;
+      drawToken += 1;
       cardImage.hidden = true;
       cardImage.removeAttribute("src");
       placeholder.hidden = false;
@@ -455,10 +474,6 @@
     });
 
     updateStats();
-    cards.forEach((card) => {
-      const image = new Image();
-      image.src = encodeURI(card);
-    });
   </script>
 </body>
 </html>
