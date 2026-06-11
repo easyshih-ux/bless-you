@@ -280,7 +280,7 @@
 
       <div class="stats" aria-live="polite">
         <div class="stat">
-          <strong id="remainingCount">31</strong>
+          <strong id="remainingCount">30</strong>
           <span>尚未抽出</span>
         </div>
         <div class="stat">
@@ -320,7 +320,6 @@
       "optimized/card06.jpg",
       "optimized/card07.jpg",
       "optimized/card08.jpg",
-      "optimized/card09.jpg",
       "optimized/card10.jpg",
       "optimized/card11.jpg",
       "optimized/card12.jpg",
@@ -449,7 +448,7 @@
         preloadUpcomingCards();
 
         if (remaining.length === 0) {
-          resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
+          resultText.textContent = "30 張祝福都已抽完，可以重新洗牌。";
         }
       };
 
@@ -493,7 +492,7 @@
           const card = drawFromDeck();
           if (!card) {
             cardShell.classList.remove("is-drawing");
-            resultText.textContent = "31 張祝福都已抽完，可以重新開始。";
+            resultText.textContent = "30 張祝福都已抽完，可以重新洗牌。";
             isDrawing = false;
             updateStats();
             return;
